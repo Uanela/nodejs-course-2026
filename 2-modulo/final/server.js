@@ -55,13 +55,37 @@ const server = http.createServer((req, res) => {
         responseBody = { mensagem: `Carro com id ${id} não encontrado.` };
       }
     }
+  } else if (method === "POST") {
+    if (url === "/api/carros") {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk.toString();
+      });
+
+      req.on("end", () => {
+        const data = JSON.parse(body);
+        data.id = database.carros.length + 1;
+
+        database.carros.push(data);
+
+        responseBody = { carro: data };
+        statusCode = 201;
+
+        // Definindo o tipo de resposta (usando header) que será enviado
+        res.writeHead(statusCode, { "Content-type": contentType });
+        res.end(JSON.striœngify(responseBody));
+      });
+    }
   }
 
   if (responseBody?.mensagem === "Rota não encontrada") statusCode = 404;
 
-  // Definindo o tipo de resposta (usando header) que será enviado
-  res.writeHead(statusCode, { "Content-type": contentType });
-  res.end(JSON.stringify(responseBody));
+  if (!["POST", "PUT", "PATCH"].includes(method)) {
+    // Definindo o tipo de resposta (usando header) que será enviado
+    res.writeHead(statusCode, { "Content-type": contentType });
+    res.end(JSON.stringify(responseBody));
+  }
 
   // Fazendo log de dados da requisição
   console.log(
