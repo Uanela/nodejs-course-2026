@@ -2,13 +2,16 @@ import http from "http";
 
 // Criando o servidor http
 const server = http.createServer((req, res) => {
-  const obj = {
-    name: "Uanela",
-    age: "40",
-    country: "Moçambique",
-  };
+  // Metódos HTTP
+  // GET - Buscar/Ler/Pegar
+  // POST - Criar
+  // PUT - Atualizar todos os campos
+  // PATCH - Atualizar parcial
+  // DELETE - Apagar recurso
 
-  // JSON - JavaScript Object Notation
+  // Rotas
+  // /produtos
+  // /usuarios
 
   res.writeHead(200, { "Content-type": "application/json" });
   res.end(`{
