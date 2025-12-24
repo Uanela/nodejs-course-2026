@@ -1,4 +1,7 @@
 import http from "http";
+import chalk from "chalk";
+
+// const http = require("http");
 
 // Metódos HTTP
 // GET - Buscar/Ler/Pegar
@@ -166,7 +169,9 @@ const PORT = 3001;
 
 // Configurando para escutar requisições na porta 3000
 server.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(
+    `[${chalk.green("Ready")}] Servidor rodando em http://localhost:${PORT}`
+  );
 });
 
 // uanelaluiswayne@gmail.com
