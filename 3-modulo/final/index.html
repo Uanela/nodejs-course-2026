@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aprendendo Node.js</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 50px;
+        max-width: 800px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        animation: fadeIn 0.8s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .logo {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 30px;
+        background: #68a063;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 10px 25px rgba(104, 160, 99, 0.3);
+      }
+
+      h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        color: #7f8c8d;
+        font-size: 1.2em;
+        margin-bottom: 40px;
+        font-weight: 300;
+      }
+
+      .card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin: 30px 0;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      }
+
+      .card h2 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+      }
+
+      .card p {
+        line-height: 1.6;
+        font-size: 1.1em;
+      }
+
+      .progress-bar {
+        background: #ecf0f1;
+        height: 30px;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 30px 0;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .progress {
+        background: linear-gradient(90deg, #68a063, #4a8c47);
+        height: 100%;
+        width: 45%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        animation: loading 2s ease-out;
+      }
+
+      @keyframes loading {
+        from {
+          width: 0%;
+        }
+        to {
+          width: 45%;
+        }
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .feature {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+        transition: transform 0.3s ease;
+      }
+
+      .feature:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .feature h3 {
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      .feature p {
+        color: #7f8c8d;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">N</div>
+      <h1>Estou Aprendendo Node.js! 🚀</h1>
+      <p class="subtitle"
+        >Uma jornada empolgante no mundo do JavaScript no servidor</p
+      >
+
+      <div class="card">
+        <h2>Por que Node.js?</h2>
+        <p
+          >Node.js permite executar JavaScript no servidor, criar aplicações
+          rápidas e escaláveis, e trabalhar com a mesma linguagem tanto no
+          frontend quanto no backend!</p
+        >
+      </div>
+
+      <h3 style="color: #2c3e50; margin-top: 30px">Progresso do Aprendizado</h3>
+      <div class="progress-bar">
+        <div class="progress">45% Completo</div>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <h3>📦 NPM</h3>
+          <p>Gerenciador de pacotes</p>
+        </div>
+        <div class="feature">
+          <h3>⚡ Express</h3>
+          <p>Framework web</p>
+        </div>
+        <div class="feature">
+          <h3>🔄 APIs REST</h3>
+          <p>Criar APIs poderosas</p>
+        </div>
+        <div class="feature">
+          <h3>💾 PostgreSQL</h3>
+          <p>Banco de dados SQL</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
