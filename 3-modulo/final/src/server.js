@@ -65,13 +65,12 @@ const server = http.createServer(async (req, res) => {
         // GET /api/cars/:id - Buscar um carro atráves do ID
       } else if (url.startsWith("/api/cars/")) {
         const id = extractId(url);
-        const result = await db.query(
-          `SELECT * FROM cars WHERE id = ${id} JOIN`
-        );
+        const result = await db.query(`SELECT * FROM cars WHERE id = ${id}`);
         const car = result.rows[0];
 
         if (car) {
           responseBody = { car };
+          œ;
         } else {
           statusCode = 404;
           responseBody = { mensagem: `Carro com id ${id} não encontrado.` };
@@ -109,47 +108,44 @@ const server = http.createServer(async (req, res) => {
       if (url.startsWith("/api/cars/")) {
         const id = extractId(url);
 
-        if (true) {
-          let body = "";
-          req.on("data", (chunk) => {
-            body += chunk.toString();
-          });
+        let body = "";
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+        });
 
-          req.on("end", async () => {
-            const data = JSON.parse(body);
-            const entries = Object.entries(data);
+        req.on("end", async () => {
+          const data = JSON.parse(body);
+          const entries = Object.entries(data);
 
-            const result = await db.query(
-              `UPDATE cars SET ${entries
-                .map(([key, val]) => `${key} = '${val}'`)
-                .join(", ")} WHERE id = ${id} RETURNING *`
-            );
+          const result = await db.query(
+            `UPDATE cars SET ${entries
+              .map(([key, val]) => `${key} = '${val}'`)
+              .join(", ")} WHERE id = ${id} RETURNING *`
+          );
 
+          if (!result.rows[0]) {
+            statusCode = 404;
+            responseBody = {
+              mensagem: `Carro com id ${id} não encontrado para poder atualizar.`,
+            };
+          } else {
             responseBody = { car: result.rows[0] };
             statusCode = 200;
+          }
 
-            // Definindo o tipo de resposta (usando header) que será enviado
-            res.writeHead(statusCode, { "Content-type": contentType });
-            res.end(JSON.stringify(responseBody));
-          });
-        } else {
-          statusCode = 404;
-          responseBody = {
-            mensagem: `Carro com id ${id} não encontrado para poder atualizar.`,
-          };
-
+          // Definindo o tipo de resposta (usando header) que será enviado
           res.writeHead(statusCode, { "Content-type": contentType });
           res.end(JSON.stringify(responseBody));
-        }
+        });
       }
     } else if (method === "DELETE") {
-      if (url.startsWith("/api/carros/")) {
+      if (url.startsWith("/api/cars/")) {
         const id = extractId(url);
-        let carro = findById(id);
-        if (carro) {
-          database.carros = database.carros.filter((c) => {
-            if (c.id !== id) return c;
-          });
+        const result = await db.query(
+          `DELETE FROM  cars WHERE id = ${id} RETURNING *`
+        );
+
+        if (result.rows[0]) {
           statusCode = 204;
           responseBody = null;
         } else {
