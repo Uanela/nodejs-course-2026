@@ -1,12 +1,13 @@
 import dotenv from "dotenv";
-
 dotenv.config();
 
 import http from "http";
 import chalk from "chalk";
 import db from "./db/index.js";
 
-console.log(db);
+const cars = await db.query(`SELECT * FROM cars`);
+
+console.log(cars);
 
 // const http = require("http");
 
@@ -45,7 +46,7 @@ function findById(id) {
 }
 
 // Criando o servidor http
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const { method, url } = req;
 
   // Headers
