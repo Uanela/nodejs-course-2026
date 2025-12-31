@@ -1,13 +1,9 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ quiet: true });
 
 import http from "http";
 import chalk from "chalk";
 import db from "./db/index.js";
-
-const cars = await db.query(`SELECT * FROM cars`);
-
-console.log(cars);
 
 // const http = require("http");
 
@@ -77,22 +73,26 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    // POST /api/carros - Criar novo carro
+    // POST /api/cars - Criar novo carro
   } else if (method === "POST") {
-    if (url === "/api/carros") {
+    if (url === "/api/cars") {
       let body = "";
 
       req.on("data", (chunk) => {
         body += chunk.toString();
       });
 
-      req.on("end", () => {
+      req.on("end", async () => {
         const data = JSON.parse(body);
-        data.id = database.carros.length + 1;
+        const query = `INSERT INTO cars 
+          (price, model, color, transmission_type, release_year, brand_id)
+          VALUES
+          ('${data.price}', '${data.model}', '${data.color}', '${data.transmission_type}', '${data.release_year}', '${data.brand_id}') RETURNING *
+          `;
 
-        database.carros.push(data);
+        const result = await db.query(query);
 
-        responseBody = { carro: data };
+        responseBody = { car: result.rows[0] };
         statusCode = 201;
 
         // Definindo o tipo de resposta (usando header) que será enviado
