@@ -58,14 +58,16 @@ const server = http.createServer(async (req, res) => {
         responseBody = { produtos: database.produtos };
         // GET /api/cars - Retona a lista de carros
       } else if (url === "/api/cars") {
-        const result = await db.query(`SELECT * FROM cars`);
+        const result = await db.query(`SELECT * FROM cars `);
 
         responseBody = { cars: result.rows };
 
         // GET /api/cars/:id - Buscar um carro atráves do ID
       } else if (url.startsWith("/api/cars/")) {
         const id = extractId(url);
-        const result = await db.query(`SELECT * FROM cars WHERE id = ${id}`);
+        const result = await db.query(
+          `SELECT * FROM cars WHERE id = ${id} JOIN`
+        );
         const car = result.rows[0];
 
         if (car) {
@@ -104,26 +106,26 @@ const server = http.createServer(async (req, res) => {
         });
       }
     } else if (method === "PATCH") {
-      if (url.startsWith("/api/carros/")) {
+      if (url.startsWith("/api/cars/")) {
         const id = extractId(url);
-        let carro = findById(id);
 
-        if (carro) {
+        if (true) {
           let body = "";
           req.on("data", (chunk) => {
             body += chunk.toString();
           });
 
-          req.on("end", () => {
+          req.on("end", async () => {
             const data = JSON.parse(body);
-            carro = { ...carro, ...data };
+            const entries = Object.entries(data);
 
-            database.carros = database.carros.map((c) => {
-              if (c.id === id) return { ...c, ...carro };
-              return c;
-            });
+            const result = await db.query(
+              `UPDATE cars SET ${entries
+                .map(([key, val]) => `${key} = '${val}'`)
+                .join(", ")} WHERE id = ${id} RETURNING *`
+            );
 
-            responseBody = { carro };
+            responseBody = { car: result.rows[0] };
             statusCode = 200;
 
             // Definindo o tipo de resposta (usando header) que será enviado
