@@ -33,7 +33,7 @@ const database = {
 
 // Helper function para extrair ID≈
 function extractId(url) {
-  return Number(url.split("/")[3]);
+  return url.split("/")[3];
 }
 
 // Helper function para encontrar por ID
@@ -43,7 +43,8 @@ function findById(id) {
 
 // Criando o servidor http
 const server = http.createServer(async (req, res) => {
-  const { method, url } = req;
+  let { method, url } = req;
+  url = decodeURIComponent(url);
   // Headers
   let statusCode = 200;
   let contentType = "application/json";
@@ -69,7 +70,8 @@ const server = http.createServer(async (req, res) => {
         const id = extractId(url);
         const result = await db.query(
           `SELECT cars.*, brands.name AS brand__name, brands.created_at AS brand__created_at FROM cars 
-          JOIN brands ON cars.brand_id = brands.id WHERE cars.id = ${id}`
+          JOIN brands ON cars.brand_id = brands.id WHERE cars.id = $1`,
+          [id]
         );
         const car = result.rows[0];
 
@@ -94,11 +96,18 @@ const server = http.createServer(async (req, res) => {
           const data = JSON.parse(body);
           const query = `INSERT INTO cars 
           (price, model, color, transmission_type, release_year, brand_id)
-          VALUES
-          ('${data.price}', '${data.model}', '${data.color}', '${data.transmission_type}', '${data.release_year}', '${data.brand_id}') RETURNING *
+          VALUES ($1, $2, $3, $4, $5, $6)
+           RETURNING *
           `;
 
-          const result = await db.query(query);
+          const result = await db.query(query, [
+            data.price,
+            data.model,
+            data.color,
+            data.transmission_type,
+            data.release_year,
+            data.brand_id,
+          ]);
 
           responseBody = { car: result.rows[0] };
           statusCode = 201;
@@ -119,12 +128,12 @@ const server = http.createServer(async (req, res) => {
 
         req.on("end", async () => {
           const data = JSON.parse(body);
-          const entries = Object.entries(data);
 
           const result = await db.query(
-            `UPDATE cars SET ${entries
-              .map(([key, val]) => `${key} = '${val}'`)
-              .join(", ")} WHERE id = ${id} RETURNING *`
+            `UPDATE cars SET ${Object.keys(data)
+              .map((key, i) => `${key} = $${i + 1}`)
+              .join(", ")} WHERE id = ${id} RETURNING *`,
+            Object.values(data)
           );
 
           if (!result.rows[0]) {
@@ -145,9 +154,8 @@ const server = http.createServer(async (req, res) => {
     } else if (method === "DELETE") {
       if (url.startsWith("/api/cars/")) {
         const id = extractId(url);
-        const result = await db.query(
-          `DELETE FROM  cars WHERE id = ${id} RETURNING *`
-        );
+        const query = `DELETE FROM  cars WHERE id = $1 RETURNING *`;
+        const result = await db.query(query, [id]);
 
         if (result.rows[0]) {
           statusCode = 204;
