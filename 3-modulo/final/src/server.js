@@ -58,19 +58,23 @@ const server = http.createServer(async (req, res) => {
         responseBody = { produtos: database.produtos };
         // GET /api/cars - Retona a lista de carros
       } else if (url === "/api/cars") {
-        const result = await db.query(`SELECT * FROM cars `);
+        const result =
+          await db.query(`SELECT cars.*, brands.name AS brand__name, brands.created_at AS brand__created_at FROM cars 
+          JOIN brands ON cars.brand_id = brands.id`);
 
         responseBody = { cars: result.rows };
 
         // GET /api/cars/:id - Buscar um carro atráves do ID
       } else if (url.startsWith("/api/cars/")) {
         const id = extractId(url);
-        const result = await db.query(`SELECT * FROM cars WHERE id = ${id}`);
+        const result = await db.query(
+          `SELECT cars.*, brands.name AS brand__name, brands.created_at AS brand__created_at FROM cars 
+          JOIN brands ON cars.brand_id = brands.id WHERE cars.id = ${id}`
+        );
         const car = result.rows[0];
 
         if (car) {
           responseBody = { car };
-          œ;
         } else {
           statusCode = 404;
           responseBody = { mensagem: `Carro com id ${id} não encontrado.` };
