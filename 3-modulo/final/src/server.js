@@ -44,7 +44,6 @@ function findById(id) {
 // Criando o servidor http
 const server = http.createServer(async (req, res) => {
   const { method, url } = req;
-
   // Headers
   let statusCode = 200;
   let contentType = "application/json";
@@ -52,118 +51,129 @@ const server = http.createServer(async (req, res) => {
   // Response body
   let responseBody = { mensagem: "Rota não encontrada" };
 
-  if (method === "GET") {
-    // GET /api/produtos - Retona a lista de produtos
-    if (url === "/api/produtos") {
-      responseBody = { produtos: database.produtos };
-      // GET /api/carros - Retona a lista de carros
-    } else if (url === "/api/carros") {
-      responseBody = { carros: database.carros };
+  try {
+    if (method === "GET") {
+      // GET /api/produtos - Retona a lista de produtos
+      if (url === "/api/produtos") {
+        responseBody = { produtos: database.produtos };
+        // GET /api/cars - Retona a lista de carros
+      } else if (url === "/api/cars") {
+        const result = await db.query(`SELECT * FROM cars`);
 
-      // GET /api/carros/:id - Buscar um carro atráves do ID
-    } else if (url.startsWith("/api/carros/")) {
-      const id = extractId(url);
-      const carro = findById(id);
+        responseBody = { cars: result.rows };
 
-      if (carro) {
-        responseBody = { carro };
-      } else {
-        statusCode = 404;
-        responseBody = { mensagem: `Carro com id ${id} não encontrado.` };
+        // GET /api/cars/:id - Buscar um carro atráves do ID
+      } else if (url.startsWith("/api/cars/")) {
+        const id = extractId(url);
+        const result = await db.query(`SELECT * FROM cars WHERE id = ${id}`);
+        const car = result.rows[0];
+
+        if (car) {
+          responseBody = { car };
+        } else {
+          statusCode = 404;
+          responseBody = { mensagem: `Carro com id ${id} não encontrado.` };
+        }
       }
-    }
 
-    // POST /api/cars - Criar novo carro
-  } else if (method === "POST") {
-    if (url === "/api/cars") {
-      let body = "";
+      // POST /api/cars - Criar novo carro
+    } else if (method === "POST") {
+      if (url === "/api/cars") {
+        let body = "";
 
-      req.on("data", (chunk) => {
-        body += chunk.toString();
-      });
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+        });
 
-      req.on("end", async () => {
-        const data = JSON.parse(body);
-        const query = `INSERT INTO cars 
+        req.on("end", async () => {
+          const data = JSON.parse(body);
+          const query = `INSERT INTO cars 
           (price, model, color, transmission_type, release_year, brand_id)
           VALUES
           ('${data.price}', '${data.model}', '${data.color}', '${data.transmission_type}', '${data.release_year}', '${data.brand_id}') RETURNING *
           `;
 
-        const result = await db.query(query);
+          const result = await db.query(query);
 
-        responseBody = { car: result.rows[0] };
-        statusCode = 201;
-
-        // Definindo o tipo de resposta (usando header) que será enviado
-        res.writeHead(statusCode, { "Content-type": contentType });
-        res.end(JSON.stringify(responseBody));
-      });
-    }
-  } else if (method === "PATCH") {
-    if (url.startsWith("/api/carros/")) {
-      const id = extractId(url);
-      let carro = findById(id);
-
-      if (carro) {
-        let body = "";
-        req.on("data", (chunk) => {
-          body += chunk.toString();
-        });
-
-        req.on("end", () => {
-          const data = JSON.parse(body);
-          carro = { ...carro, ...data };
-
-          database.carros = database.carros.map((c) => {
-            if (c.id === id) return { ...c, ...carro };
-            return c;
-          });
-
-          responseBody = { carro };
-          statusCode = 200;
+          responseBody = { car: result.rows[0] };
+          statusCode = 201;
 
           // Definindo o tipo de resposta (usando header) que será enviado
           res.writeHead(statusCode, { "Content-type": contentType });
           res.end(JSON.stringify(responseBody));
         });
-      } else {
-        statusCode = 404;
-        responseBody = {
-          mensagem: `Carro com id ${id} não encontrado para poder atualizar.`,
-        };
+      }
+    } else if (method === "PATCH") {
+      if (url.startsWith("/api/carros/")) {
+        const id = extractId(url);
+        let carro = findById(id);
 
-        res.writeHead(statusCode, { "Content-type": contentType });
-        res.end(JSON.stringify(responseBody));
+        if (carro) {
+          let body = "";
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+
+          req.on("end", () => {
+            const data = JSON.parse(body);
+            carro = { ...carro, ...data };
+
+            database.carros = database.carros.map((c) => {
+              if (c.id === id) return { ...c, ...carro };
+              return c;
+            });
+
+            responseBody = { carro };
+            statusCode = 200;
+
+            // Definindo o tipo de resposta (usando header) que será enviado
+            res.writeHead(statusCode, { "Content-type": contentType });
+            res.end(JSON.stringify(responseBody));
+          });
+        } else {
+          statusCode = 404;
+          responseBody = {
+            mensagem: `Carro com id ${id} não encontrado para poder atualizar.`,
+          };
+
+          res.writeHead(statusCode, { "Content-type": contentType });
+          res.end(JSON.stringify(responseBody));
+        }
+      }
+    } else if (method === "DELETE") {
+      if (url.startsWith("/api/carros/")) {
+        const id = extractId(url);
+        let carro = findById(id);
+        if (carro) {
+          database.carros = database.carros.filter((c) => {
+            if (c.id !== id) return c;
+          });
+          statusCode = 204;
+          responseBody = null;
+        } else {
+          statusCode = 404;
+          responseBody = {
+            mensagem: `Carro com id ${id} não encontrado para poder deletar.`,
+          };
+        }
       }
     }
-  } else if (method === "DELETE") {
-    if (url.startsWith("/api/carros/")) {
-      const id = extractId(url);
-      let carro = findById(id);
-      if (carro) {
-        database.carros = database.carros.filter((c) => {
-          if (c.id !== id) return c;
-        });
-        statusCode = 204;
-        responseBody = null;
-      } else {
-        statusCode = 404;
-        responseBody = {
-          mensagem: `Carro com id ${id} não encontrado para poder deletar.`,
-        };
-      }
-    }
+
+    if (responseBody?.mensagem === "Rota não encontrada") statusCode = 404;
+  } catch (error) {
+    responseBody = {
+      message: error.message,
+      stack: error.stack.split("\n"),
+      error,
+    };
+    statusCode = 500;
   }
-
-  if (responseBody?.mensagem === "Rota não encontrada") statusCode = 404;
 
   if (!["POST", "PATCH"].includes(method)) {
     // Definindo o tipo de resposta (usando header) que será enviado
     res.writeHead(statusCode, { "Content-type": contentType });
     res.end(JSON.stringify(responseBody));
   }
-
   // Fazendo log de dados da requisição
   console.log(
     req.method,
